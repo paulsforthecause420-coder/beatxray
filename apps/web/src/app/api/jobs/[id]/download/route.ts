@@ -1,0 +1,3 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+export async function GET(_:Request,{params}:{params:Promise<{id:string}>}){const {id}=await params;const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)return NextResponse.json({error:"Unauthorized"},{status:401});const {data:job}=await supabase.from("analysis_jobs").select("result_path").eq("id",id).single();if(!job?.result_path)return NextResponse.json({error:"Result not ready"},{status:404});const {data,error}=await supabase.storage.from("analysis-results").createSignedUrl(job.result_path,60);if(error)return NextResponse.json({error:error.message},{status:500});return NextResponse.redirect(data.signedUrl);}

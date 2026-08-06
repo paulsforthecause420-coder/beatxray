@@ -1,0 +1,7 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
+const schema=z.object({storagePath:z.string().min(3),originalFilename:z.string().min(1).max(255),daw:z.enum(["flstudio","ableton"]),fileSize:z.number().int().positive().max(250*1024*1024),mimeType:z.string().max(120)});
+export async function POST(request:Request){const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)return NextResponse.json({error:"Unauthorized"},{status:401}); const parsed=schema.safeParse(await request.json());if(!parsed.success)return NextResponse.json({error:"Invalid request"},{status:400}); if(!parsed.data.storagePath.startsWith(`${user.id}/`))return NextResponse.json({error:"Invalid storage path"},{status:403});
+ const {data:job,error}=await supabase.from("analysis_jobs").insert({user_id:user.id,source_path:parsed.data.storagePath,original_filename:parsed.data.originalFilename,daw:parsed.data.daw,file_size:parsed.data.fileSize,mime_type:parsed.data.mimeType,status:"queued",progress:0}).select("id").single(); if(error)return NextResponse.json({error:error.message},{status:500});
+ if(process.env.WORKER_WEBHOOK_URL){fetch(process.env.WORKER_WEBHOOK_URL,{method:"POST",headers:{"content-type":"application/json","x-beatxray-secret":process.env.WORKER_WEBHOOK_SECRET||""},body:JSON.stringify({jobId:job.id})}).catch(console.error);} return NextResponse.json({id:job.id},{status:201});}

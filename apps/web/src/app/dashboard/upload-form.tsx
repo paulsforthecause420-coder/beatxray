@@ -1,0 +1,10 @@
+"use client";
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+
+export default function UploadForm(){ const [file,setFile]=useState<File|null>(null); const [daw,setDaw]=useState("flstudio"); const [busy,setBusy]=useState(false); const [error,setError]=useState(""); const router=useRouter();
+ async function submit(e:FormEvent){e.preventDefault(); if(!file)return; setBusy(true); setError(""); try { const supabase=createClient(); const {data:{user}}=await supabase.auth.getUser(); if(!user)throw new Error("Please sign in again.");
+ const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_"); const path=`${user.id}/${crypto.randomUUID()}/${safe}`; const upload=await supabase.storage.from("song-uploads").upload(path,file,{contentType:file.type,upsert:false}); if(upload.error)throw upload.error;
+ const res=await fetch("/api/jobs",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({storagePath:path,originalFilename:file.name,daw,fileSize:file.size,mimeType:file.type})}); const body=await res.json(); if(!res.ok)throw new Error(body.error||"Could not create analysis job."); setFile(null); router.refresh(); } catch(err){setError(err instanceof Error?err.message:"Upload failed");} finally{setBusy(false);} }
+ return <form className="upload form" onSubmit={submit}><div><strong>Upload a song for analysis</strong><div className="notice">MVP limit: 250 MB. Use material you own or are authorized to analyze.</div></div><label className="label">Audio file<input className="input" type="file" accept="audio/*,.wav,.mp3,.flac,.m4a,.aiff" required onChange={e=>setFile(e.target.files?.[0]||null)}/></label><label className="label">Target DAW<select className="select" value={daw} onChange={e=>setDaw(e.target.value)}><option value="flstudio">FL Studio</option><option value="ableton">Ableton Live</option></select></label>{error&&<div className="error">{error}</div>}<button className="btn primary" disabled={busy||!file}>{busy?"Uploading…":"Start X-Ray"}</button></form> }
