@@ -1,0 +1,16 @@
+# Project-scoped Codex configuration. Loaded only for trusted projects.
+# Do not put secrets in this file.
+
+[agents]
+max_concurrent_threads_per_session = 6
+
+[mcp_servers.openaiDeveloperDocs]
+url = "https://developers.openai.com/mcp"
+
+# Add provider MCP connections only after confirming their current official
+# endpoint and authentication requirements.
+#
+# Example:
+# [mcp_servers.example]
+# url = "https://provider.example/mcp"
+# bearer_token_env_var = "EXAMPLE_MCP_TOKEN"

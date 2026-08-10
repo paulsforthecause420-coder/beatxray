@@ -1,0 +1,7 @@
+# Suggested additions to the repository .gitignore
+.env
+.env.*
+!.env.example
+.codex-log/
+*.log
+artifacts/private/
