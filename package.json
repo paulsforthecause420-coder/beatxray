@@ -11,9 +11,12 @@
     "lint": "npm --workspace apps/web run lint",
     "test": "npm --workspace apps/web run test --if-present",
     "check:env": "bash scripts/check-environment.sh",
+    "check:worker-runtime": "bash scripts/check-worker-runtime.sh",
     "verify": "bash scripts/verify-repo.sh"
   },
   "overrides": {
-    "postcss": "8.5.10"
+    "postcss": "8.5.26",
+    "sharp": "0.35.3",
+    "nanoid": "3.3.18"
   }
 }
