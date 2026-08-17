@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { deleteAnalysisJobData } from "@/lib/jobs/delete-data";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -78,30 +79,11 @@ export async function DELETE(_: Request, context: { params: Promise<{ id: string
     return NextResponse.json({ error: "Cancel the active job first, then delete its data after processing stops." }, { status: 409 });
   }
 
-  const admin = createAdminClient();
-  const { data: artifacts } = await admin.from("artifacts").select("storage_path").eq("job_id", job.id);
-  const resultPaths = new Set([...(artifacts ?? []).map((artifact) => artifact.storage_path), job.result_path].filter(Boolean));
-  if (resultPaths.size) {
-    const { error } = await admin.storage.from("analysis-results").remove([...resultPaths]);
-    if (error) {
-      return NextResponse.json({ error: "Could not remove generated analysis data." }, { status: 502 });
-    }
-  }
-  const { error: sourceError } = await admin.storage.from("song-uploads").remove([job.source_path]);
-  if (sourceError) {
-    return NextResponse.json({ error: "Could not remove the original upload." }, { status: 502 });
-  }
-
-  await admin.from("audit_log").insert({
-    actor_id: user.id,
-    action: "analysis_data_deleted",
-    target_type: "analysis_job",
-    target_id: job.id,
-    metadata: {},
-  });
-  const { error: deleteError } = await admin.from("analysis_jobs").delete().eq("id", job.id).eq("user_id", user.id);
-  if (deleteError) {
-    return NextResponse.json({ error: "Could not delete analysis records." }, { status: 500 });
+  try {
+    await deleteAnalysisJobData(job, "user_request");
+  } catch (caught) {
+    const message = caught instanceof Error ? caught.message : "Could not delete analysis data.";
+    return NextResponse.json({ error: message }, { status: 502 });
   }
   return new NextResponse(null, { status: 204 });
 }
