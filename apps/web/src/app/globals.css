@@ -47,3 +47,45 @@ button, input, select { font: inherit; }
 .error { color:var(--danger); font-size:.9rem; }
 .footer { border-top:1px solid var(--line); padding:28px 0 40px; color:var(--muted); font-size:.86rem; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; }
 @media (max-width:800px){ .grid{grid-template-columns:1fr}.hero{padding-top:55px}.dashboard-head{align-items:start;flex-direction:column}.job{grid-template-columns:1fr} }
+/* BeatXray electric fractal background */
+html {
+  background-color: #01030a;
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+  background: transparent !important;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  background-image:
+    radial-gradient(
+      circle at center,
+      rgba(1, 3, 10, 0.12) 0%,
+      rgba(1, 3, 10, 0.38) 48%,
+      rgba(1, 3, 10, 0.68) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(1, 3, 10, 0.08) 0%,
+      rgba(1, 3, 10, 0.35) 100%
+    ),
+    url("/images/beatxray-electric-background.png");
+
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Improves readability without hiding the artwork */
+main {
+  position: relative;
+}
