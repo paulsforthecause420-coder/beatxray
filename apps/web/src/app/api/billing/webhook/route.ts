@@ -97,8 +97,14 @@ export async function POST(request: Request) {
     payload_hash: payloadHash,
   });
   if (receivedError) {
-    return NextResponse.json({ error: "Could not record webhook receipt." }, { status: 500 });
-  }
+  console.error("Stripe webhook receipt insert failed", {
+    code: receivedError.code,
+    message: receivedError.message,
+    details: receivedError.details,
+    hint: receivedError.hint,
+  });
+  return NextResponse.json({ error: "Could not record webhook receipt." }, { status: 500 });
+}
 
   try {
     if (
