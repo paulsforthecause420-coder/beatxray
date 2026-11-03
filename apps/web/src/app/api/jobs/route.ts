@@ -26,6 +26,8 @@ const schema = z.object({
     .max(255)
     .refine((name) => !/[\u0000-\u001f]/.test(name), "Invalid filename"),
   daw: z.enum(["flstudio", "ableton"]),
+  workflow: z.enum(["intelligence", "mastering_assist", "intelligence_and_mastering"]),
+  masteringProfile: z.enum(["balanced", "streaming", "loud", "dynamic"]),
   fileSize: z.number().int().positive().max(MAX_UPLOAD_BYTES),
   mimeType: z.string().min(1).max(120),
   idempotencyKey: z.string().uuid(),
@@ -106,6 +108,8 @@ export async function POST(request: Request) {
       source_path: parsed.data.storagePath,
       original_filename: parsed.data.originalFilename,
       daw: parsed.data.daw,
+      workflow: parsed.data.workflow,
+      mastering_profile: parsed.data.masteringProfile,
       file_size: storedSize,
       mime_type: storedMimeType,
       idempotency_key: parsed.data.idempotencyKey,
@@ -140,7 +144,7 @@ export async function POST(request: Request) {
     job_id: job.id,
     stage: "created",
     event_type: "job_created",
-    payload: { file_size: storedSize, mime_type: storedMimeType },
+    payload: { file_size: storedSize, mime_type: storedMimeType, workflow: parsed.data.workflow, mastering_profile: parsed.data.masteringProfile },
   });
   const dispatch = await dispatchJob(job.id);
   if (!dispatch.ok) {
