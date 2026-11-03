@@ -27,6 +27,7 @@ image = (
     .entrypoint([])
     .apt_install("ffmpeg", "libsndfile1")
     .pip_install_from_requirements("requirements.txt")
+    .pip_install("fastapi>=0.115,<0.116")
     .add_local_dir("beatxray", remote_path="/root/beatxray")
 )
 
@@ -503,3 +504,9 @@ def process(job_id: str) -> dict[str, Any]:
         )
         _event(sb, job_id, "failed", "failed", {"error_code": exc.__class__.__name__})
         raise
+
+
+@app.local_entrypoint()
+def main() -> None:
+    """Run the deployed image compatibility check from the Modal CLI."""
+    print(runtime_sanity_check.remote())
