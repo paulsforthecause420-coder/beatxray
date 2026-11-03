@@ -173,6 +173,7 @@ def _package_export(
     job: dict[str, Any],
     analysis: dict[str, Any],
     education: dict[str, Any],
+    mastering: dict[str, Any] | None,
     artifacts: dict[str, dict[str, Any]],
 ) -> bytes:
     from beatxray.exporters import export_ableton, export_fl_studio
@@ -225,6 +226,10 @@ def _package_export(
 
         (analysis_folder / "full-analysis.json").write_text(json.dumps(analysis, indent=2), encoding="utf-8")
         (analysis_folder / "education.json").write_text(json.dumps(education, indent=2), encoding="utf-8")
+        if mastering:
+            (analysis_folder / "mastering-intelligence.json").write_text(
+                json.dumps(mastering, indent=2), encoding="utf-8"
+            )
         (analysis_folder / "sections.json").write_text(json.dumps(analysis.get("sections", []), indent=2), encoding="utf-8")
         (analysis_folder / "chords.json").write_text(json.dumps(analysis.get("chords", []), indent=2), encoding="utf-8")
         (analysis_folder / "beat-grid.json").write_text(
@@ -241,6 +246,7 @@ def _package_export(
             "target_daw": job["daw"],
             "analysis": analysis,
             "education": education,
+            "mastering": mastering,
             "tracks": tracks,
             "disclaimer": "This is an AI-assisted reconstruction, not the original production session.",
         }
@@ -451,7 +457,7 @@ def process(job_id: str) -> dict[str, Any]:
         else:
             _assert_not_cancelled(sb, job_id)
             _set_stage(sb, job_id, "packaging", 90)
-            archive = _package_export(sb, job, analysis, education, artifacts)
+            archive = _package_export(sb, job, analysis, education, mastering, artifacts)
             result_path = _store_artifact(
                 sb,
                 job,
