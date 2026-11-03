@@ -313,6 +313,7 @@ def separate_stems_on_gpu(job_id: str) -> dict[str, Any]:
 def process(job_id: str) -> dict[str, Any]:
     """Resume a job from its first missing durable stage; CPU is the default runtime."""
     from beatxray.analysis import analyze_audio
+    from beatxray.mastering import inspect_master
     from beatxray.runtime import assert_runtime_compatibility, runtime_versions
     from beatxray.transcription import transcribe_audio
 
@@ -359,6 +360,31 @@ def process(job_id: str) -> dict[str, Any]:
             _event(sb, job_id, "analyzing_rhythm", "stage_completed", {"artifact": "analysis-json"})
         _set_stage(sb, job_id, "analyzing_harmony", 30, event_type="stage_completed")
         _set_stage(sb, job_id, "analyzing_effects", 35, event_type="stage_completed", payload={"notice": "effects require future model support"})
+
+        mastering = None
+        if job.get("workflow") in ("mastering_assist", "intelligence_and_mastering"):
+            artifacts = _artifacts(sb, job_id)
+            mastering_artifact = artifacts.get("mastering-intelligence-json")
+            if mastering_artifact:
+                mastering = _load_json_artifact(sb, mastering_artifact)
+                _event(sb, job_id, "mastering_analysis", "stage_reused", {"artifact": "mastering-intelligence-json"})
+            else:
+                _assert_not_cancelled(sb, job_id)
+                _set_stage(sb, job_id, "mastering_analysis", 38)
+                with tempfile.TemporaryDirectory(prefix="beatxray-mastering-") as temporary_directory:
+                    suffix = Path(job["original_filename"]).suffix.lower() or ".audio"
+                    source = Path(temporary_directory) / f"source{suffix}"
+                    source.write_bytes(sb.storage.from_("song-uploads").download(job["source_path"]))
+                    mastering = inspect_master(source, job.get("mastering_profile") or "balanced")
+                _store_artifact(
+                    sb,
+                    job,
+                    "mastering-intelligence-json",
+                    "analysis/mastering-intelligence.json",
+                    json.dumps(mastering, indent=2).encode("utf-8"),
+                    "application/json",
+                )
+                _event(sb, job_id, "mastering_analysis", "stage_completed", {"profile": mastering["profile"]})
 
         artifacts = _artifacts(sb, job_id)
         if not all(f"stem-{name}" in artifacts for name in ("drums", "bass", "vocals", "other")):
@@ -436,7 +462,7 @@ def process(job_id: str) -> dict[str, Any]:
             )
             _event(sb, job_id, "packaging", "stage_completed", {"result_path": result_path})
 
-        result_json = {"analysis": analysis, "education": education, "result_path": result_path}
+        result_json = {"analysis": analysis, "education": education, "mastering": mastering, "result_path": result_path}
         sb.table("analysis_results").upsert(
             {
                 "job_id": job_id,
