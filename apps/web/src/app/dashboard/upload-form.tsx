@@ -19,6 +19,8 @@ const ACCEPTED_MIME_TYPES = new Set([
 export default function UploadForm() {
   const [file, setFile] = useState<File | null>(null);
   const [daw, setDaw] = useState("flstudio");
+  const [workflow, setWorkflow] = useState("intelligence_and_mastering");
+  const [masteringProfile, setMasteringProfile] = useState("balanced");
   const [authorizedUse, setAuthorizedUse] = useState(false);
   const [idempotencyKey, setIdempotencyKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -82,6 +84,8 @@ export default function UploadForm() {
           storagePath: path,
           originalFilename: file.name,
           daw,
+          workflow,
+          masteringProfile,
           fileSize: file.size,
           mimeType: file.type,
           idempotencyKey,
@@ -110,7 +114,7 @@ export default function UploadForm() {
   return (
     <form className="upload form" onSubmit={submit}>
       <div>
-        <strong>Upload a song for analysis</strong>
+        <strong>Upload audio for intelligence and mastering assistance</strong>
         <div className="notice">MVP limit: 250 MB. Your upload remains private to your account.</div>
       </div>
       <label className="label">
@@ -124,6 +128,26 @@ export default function UploadForm() {
         />
       </label>
       <label className="label">
+        Workflow
+        <select className="select" value={workflow} onChange={(event) => setWorkflow(event.target.value)}>
+          <option value="intelligence">Audio Intelligence</option>
+          <option value="mastering_assist">Mastering Assist</option>
+          <option value="intelligence_and_mastering">Complete X-Ray</option>
+        </select>
+      </label>
+      {workflow !== "intelligence" && (
+        <label className="label">
+          Mastering direction
+          <select className="select" value={masteringProfile} onChange={(event) => setMasteringProfile(event.target.value)}>
+            <option value="balanced">Balanced</option>
+            <option value="streaming">Streaming</option>
+            <option value="loud">Loud</option>
+            <option value="dynamic">Dynamic</option>
+          </select>
+          <span className="notice">This creates recommendations. It will not overwrite or silently render your audio.</span>
+        </label>
+      )}
+      <label className="label">
         Target DAW
         <select className="select" value={daw} onChange={(event) => setDaw(event.target.value)}>
           <option value="flstudio">FL Studio</option>
@@ -132,12 +156,12 @@ export default function UploadForm() {
       </label>
       <label className="notice" style={{ display: "flex", alignItems: "start", gap: 8 }}>
         <input type="checkbox" checked={authorizedUse} onChange={(event) => setAuthorizedUse(event.target.checked)} required />
-        <span>I own this audio or have authorization to analyze it for educational use.</span>
+        <span>I own this audio or have authorization to analyze and process it.</span>
       </label>
       {error && <div className="error">{error}</div>}
       {notice && <div className="notice">{notice}</div>}
       <button className="btn primary" disabled={busy || !file || !authorizedUse}>
-        {busy ? "Uploading…" : "Start X-Ray"}
+        {busy ? "Uploading…" : "Run BeatXray"}
       </button>
     </form>
   );

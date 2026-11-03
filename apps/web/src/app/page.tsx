@@ -20,18 +20,18 @@ export default function Home() {
         </h1>
         <h2>Beat &gt;X&lt; Ray</h2>
         <p>
-          Upload authorized audio and receive an AI-assisted educational production reconstruction: organized stems, tempo and key analysis, arrangement markers, MIDI-ready data, and a DAW-oriented project package for FL Studio or Ableton Live.
+          Turn authorized audio into explainable production intelligence and creator-controlled mastering guidance. Inspect stems, tempo, key, arrangement, dynamics, clipping, stereo behavior and a recommended mastering starting chain.
         </p>
         <div className="actions">
           <Link className="btn primary" href="/login">
-            X-Ray a song
+            Analyze and master
           </Link>
           <a className="btn" href="#process">
             See the process
           </a>
         </div>
         <p className="notice">
-          BeatXray produces estimates from rendered audio. It does not recover an original production session or plugin chain. Upload only material you own or are authorized to analyze.
+          BeatXray produces estimates and assisted-mastering recommendations from rendered audio. It does not recover an original session or guarantee release-platform loudness. Upload only material you own or are authorized to process.
         </p>
       </section>
       <section id="process" className="grid">
@@ -47,8 +47,8 @@ export default function Home() {
         </div>
         <div className="card">
           <SlidersHorizontal />
-          <h3>Reconstruct</h3>
-          <p>Download a project package designed to help you study and rebuild production techniques inside your chosen DAW.</p>
+          <h3>Master with control</h3>
+          <p>Review explainable peak, dynamics, clipping and stereo findings before approving any future processing settings.</p>
         </div>
       </section>
       <footer className="footer">
