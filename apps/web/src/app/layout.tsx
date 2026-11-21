@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -8,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body>{children}</body></html>;
+  return <html lang="en"><body><a className="zerohype-parent-badge" href="https://zerohype.org" aria-label="ZER0 HYPE Technologies LLC" title="A ZER0 HYPE Technologies LLC company"><Image src="/images/zerohype-technologies-badge.png" alt="ZER0 HYPE Technologies LLC" width={460} height={153} priority /></a>{children}</body></html>;
 }

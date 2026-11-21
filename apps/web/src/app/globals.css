@@ -89,3 +89,40 @@ body::before {
 main {
   position: relative;
 }
+
+
+/* Parent-company badge */
+.zerohype-parent-badge {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  display: block;
+  width: clamp(132px, 15vw, 190px);
+  line-height: 0;
+  border: 1px solid rgba(199, 146, 59, 0.55);
+  border-radius: 8px;
+  padding: 5px 7px;
+  background: rgba(5, 7, 9, 0.88);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(8px);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+.zerohype-parent-badge:hover {
+  transform: translateY(-2px);
+  border-color: #c7923b;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.42);
+}
+.zerohype-parent-badge img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+@media (max-width: 640px) {
+  .zerohype-parent-badge {
+    top: 8px;
+    left: 8px;
+    width: 122px;
+    padding: 4px 5px;
+  }
+}
